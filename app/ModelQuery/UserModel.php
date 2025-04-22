@@ -5,8 +5,6 @@ use Illuminate\Support\Facades\DB;
 
 class UserModel
 {
-    protected $table = 'users';
-
     public function updateUser($request)
     {
         try {
