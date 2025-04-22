@@ -11,8 +11,12 @@ return [
      * | as required, but they're a perfect start for most applications.
      * |
      */
+    // 'defaults' => [
+    //     'guard' => 'web',
+    //     'passwords' => 'users',
+    // ],
     'defaults' => [
-        'guard' => 'web',
+        'guard' => 'api',  // Thay vì 'web', sử dụng 'api' cho JWT
         'passwords' => 'users',
     ],
 
