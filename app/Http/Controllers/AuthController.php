@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChangePasswordValidator;
 use App\Http\Requests\LoginValidator;
 use App\Http\Requests\RegisterValidator;
 use App\ModelQuery\UserModel;
@@ -99,5 +100,29 @@ class AuthController extends Controller
                 'message' => $e->getMessage(),
             ], 400);
         }
+    }
+
+    public function changePassword(ChangePasswordValidator $request)
+    {
+        // $validatedData = $request->validated();
+
+        // Tiến hành logic thay đổi mật khẩu ở đây
+
+        // Trả về phản hồi JSON
+        // return response()->json([
+        //     'message' => 'Mật khẩu đã được thay đổi thành công',
+        //     'data' => $validatedData
+        // ], 200);
+        $user = auth()->user();
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Tài khoản hoặc mật khẩu không đúng'], 401);
+        }
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Đổi mật khâu thành công',
+        ], 200);
     }
 }

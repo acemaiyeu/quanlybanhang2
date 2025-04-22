@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ChangePasswordValidator
+class ChangePasswordValidator extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,6 @@ class ChangePasswordValidator
     public function rules(): array
     {
         return [
-            'email' => 'required|email|exists:users',
             'password' => 'required',
             'new_password' => 'required',
             'confirm_new_password' => 'required|same:new_password',
@@ -34,9 +33,6 @@ class ChangePasswordValidator
     public function messages(): array
     {
         return [
-            'email.required' => 'Email không được để trống',
-            'email.email' => 'Sai định dạng email',
-            'email.exists' => 'Email không tồn tại trong hệ thống',
             'password.required' => 'Mật khẩu không được để trống',
             'new_password.required' => 'Mật khẩu mới không được để trống',
             'confirm_new_password.required' => 'Xác nhận mật khẩu mới không được để trống',
