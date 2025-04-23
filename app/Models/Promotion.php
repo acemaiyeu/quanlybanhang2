@@ -28,6 +28,15 @@ class Promotion extends Model
         'deleted_by'
     ];
 
+    protected $casts = [
+        'data' => 'object'
+    ];
+
+    public function conditions()
+    {
+        return $this->hasMany(PromotionCondition::class, 'promotion_id', 'id');
+    }
+
     public function createdBy()
     {
         return $this->hasOne(User::class, 'id', 'created_by');

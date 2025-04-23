@@ -25,6 +25,7 @@ class Cart extends Model
         'fee_ship_code',
         'fee_ship',
         'method_payment',
+        'gifts',
         'note',
         'total_price',
         'info_payment',
@@ -34,6 +35,10 @@ class Cart extends Model
         'updated_by',
         'deleted_at',
         'deleted_by'
+    ];
+
+    protected $casts = [
+        'gifts' => 'array'
     ];
 
     public function details()

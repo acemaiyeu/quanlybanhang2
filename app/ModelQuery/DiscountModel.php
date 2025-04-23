@@ -54,9 +54,9 @@ class DiscountModel
                             }
                             $total_discount = $discount_price;
                         }
-                    }
-                    if ($discount->data->discount_type == 'money') {
-                        $total_discount = $discount->data->value;
+                        if ($discount->data->discount_type == 'money') {
+                            $total_discount = $discount->data->value;
+                        }
                     }
                 }
                 if ($discount->data->type == 'all_product') {

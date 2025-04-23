@@ -42,6 +42,7 @@ class CartTransformer extends TransformerAbstract
             'total_discount' => $cart->total_discount ?? 0,
             'fee_ship_code' => $cart->fee_ship_code ?? '',
             'fee_ship' => $cart->fee_ship ?? 0,
+            'gifts' => $cart->gifts ?? '',
             'method_payment' => $cart->method_payment ?? 'COD',
             'note' => $cart->note,
             'total_price' => $cart->total_price,
