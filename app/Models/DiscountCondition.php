@@ -26,6 +26,10 @@ class DiscountCondition extends Model
         'deleted_by'
     ];
 
+    protected $casts = [
+        'condition_data' => 'object'
+    ];
+
     public function discount()
     {
         return $this->hasOne(Discount::class, 'id', 'discount_id');

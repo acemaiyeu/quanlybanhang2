@@ -2,32 +2,23 @@
 
 namespace App\Models;
 
-use App\Models\CartDetail;
 use App\Models\User;
+use App\Models\WarehouseDetail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Cart extends Model
+class Warehouse extends Model
 {
     use HasFactory;
 
-    protected $table = 'carts';
+    protected $table = 'warehouses';
 
     protected $fillable = [
         'id',
+        'code',
+        'name',
         'user_id',
-        'session_id',
-        'fullname',
-        'user_phone',
-        'user_address',
-        'discount_code',
-        'total_discount',
-        'fee_ship_code',
-        'fee_ship',
-        'method_payment',
-        'note',
-        'total_price',
-        'info_payment',
+        'address',
         'created_at',
         'created_by',
         'updated_at',
@@ -36,9 +27,14 @@ class Cart extends Model
         'deleted_by'
     ];
 
+    public function distributor()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
+
     public function details()
     {
-        return $this->hasMany(CartDetail::class, 'cart_id', 'id')->whereNull('deleted_at')->select('id', 'cart_id', 'variant_id', 'discount_id', 'discount_code', 'discount_price', 'total_discount', 'price', 'quantity', 'total_price');
+        return $this->hasMany(WarehouseDetail::class, 'warehouse_id', 'id');
     }
 
     public function createdBy()

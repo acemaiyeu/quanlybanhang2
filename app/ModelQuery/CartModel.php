@@ -2,22 +2,23 @@
 namespace App\ModelQuery;
 
 use App\Models\Cart;
+use App\Models\CartDetail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CartModel
 {
-    public static function getCart($request)
+    public function getCart($request)
     {
-        $cart = Cart::where('session_id', $request['session_id'])->first();
+        $cart = Cart::whereNull('deleted_at')->where('session_id', $request['session_id'])->with('details')->first();
         if (!empty(auth()->user())) {
-            $cart = Cart::where('user_id', auth()->user()->id)->first();
+            $cart = Cart::where('user_id', auth()->user()->id)->with('details')->first();
         }
 
         return $cart;
     }
 
-    public static function addToCart($request, $variant)
+    public function addToCart($request, $variant)
     {
         try {
             DB::beginTransaction();
@@ -33,11 +34,10 @@ class CartModel
                 $cart->user_id = auth()->user()->id;
             }
             $cart->session_id = $request['session_id'];
-            $cart->quantity = 1;
             $cart->save();
 
-            $cart_detail = CartDetail::whereNull('deleted_at')->where('cart_id', $cart->id)->where('variant_id')->first();
-            if (empty($cart->details)) {
+            $cart_detail = CartDetail::whereNull('deleted_at')->where('cart_id', $cart->id)->where('variant_id', $variant->id)->first();
+            if (empty($cart_detail)) {
                 $cart_detail = new CartDetail();
                 $cart_detail->cart_id = $cart->id;
                 $cart_detail->variant_id = $variant->id;
@@ -45,7 +45,7 @@ class CartModel
                 $cart_detail->quantity = 1;
                 $cart_detail->total_price = $variant->price;
             } else {
-                if ($request['quantity'] > 0) {
+                if ($request['quantity'] === null) {
                     $cart_detail->price = $variant->price;
                     $cart_detail->quantity += 1;
                     $cart_detail->total_price = $cart_detail->price * $cart_detail->quantity;
@@ -56,7 +56,7 @@ class CartModel
             }
             $cart_detail->save();
 
-            if ($cart->details->count() === 0) {
+            if (CartDetail::whereNull('deleted_at')->where('cart_id', $cart->id)->count() === 0) {
                 $cart->deleted_at = Carbon::now();
                 $cart->save();
             }

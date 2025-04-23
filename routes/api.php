@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ImageProxyController;
 use App\Http\Controllers\ImgurController;
 use App\Http\Controllers\VariantController;
@@ -33,7 +34,18 @@ Route::middleware(['auth:api'])->group(function () {
 });
 
 Route::prefix('v0')->group(function () {
+    // Product
     Route::get('products', [VariantController::class, 'getVariantProduct']);
+    Route::get('product/{variant_id}', [VariantController::class, 'detailVariantProduct']);
+
+    // Cart
+    Route::get('cart', [CartController::class, 'getCart']);
+    Route::post('add-to-cart', [CartController::class, 'addToCart']);
+    Route::post('add-discount', [CartController::class, 'addDiscount']);
+
+    // Discount
+
+    // Upload And Get Image
     Route::post('/upload-image', [ImgurController::class, 'uploadImage']);
     Route::get('/proxy-image', [ImageProxyController::class, 'fetchImage']);
 });

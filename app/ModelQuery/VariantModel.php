@@ -34,6 +34,9 @@ class VariantModel
                 });
             });
         }
+        if (!empty($request['id'])) {
+            $query->where('id', $request['id']);
+        }
 
         if (!empty($request['sort'])) {
             foreach ($request['sort'] as $key => $value) {

@@ -15,8 +15,9 @@ class VariantController extends Controller
         $this->model = $model;
     }
 
-    public function getVariantProduct(Request $request)
+    public function detailVariantProduct(Request $request, $id)
     {
+        $request['id'] = $id;
         $variant = $this->model->getVariantProduct($request);
 
         return fractal($variant, new VariantTransformer())->respond();

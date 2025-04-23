@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\DiscountCondition;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,8 @@ class Discount extends Model
         'start_date',
         'end_date',
         'active',
+        'apply_for',
+        'data',
         'condition_apply',
         'created_at',
         'created_by',
@@ -27,6 +30,15 @@ class Discount extends Model
         'deleted_at',
         'deleted_by'
     ];
+
+    protected $casts = [
+        'data' => 'object'
+    ];
+
+    public function conditions()
+    {
+        return $this->hasMany(DiscountCondition::class, 'discount_id', 'id');
+    }
 
     public function createdBy()
     {
