@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ImageProxyController;
 use App\Http\Controllers\ImgurController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\VariantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,10 +43,16 @@ Route::prefix('v0')->group(function () {
     Route::get('cart', [CartController::class, 'getCart']);
     Route::post('add-to-cart', [CartController::class, 'addToCart']);
     Route::post('add-discount', [CartController::class, 'addDiscount']);
+    Route::put('update-cart-info', [CartController::class, 'updateCartInfo']);
 
-    // Discount
+    // Order
+    Route::post('confirm-order', [OrderController::class, 'confirmOrder']);
 
     // Upload And Get Image
     Route::post('/upload-image', [ImgurController::class, 'uploadImage']);
     Route::get('/proxy-image', [ImageProxyController::class, 'fetchImage']);
+});
+
+Route::middleware('auth.api.client')->prefix('client/v1')->group(function () {
+    Route::get('my-orders', [OrderController::class, 'getMyOrders']);
 });

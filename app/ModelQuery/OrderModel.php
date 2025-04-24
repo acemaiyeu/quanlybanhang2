@@ -2,12 +2,41 @@
 namespace App\ModelQuery;
 
 use App\Models\Cart;
+use App\Models\CartDetail;
 use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\OrderStatus;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OrderModel
 {
+    public function getMyOrders($request)
+    {
+        $query = Order::query();
+        $query->whereNull('deleted_at');
+        $query->where('user_id', auth()->user()->id);
+        if (!empty($request['code'])) {
+            $query->where('code', $request['code']);
+        }
+        if (!empty($request['status'])) {
+            $query->whereHas('status', function ($query) use ($request) {
+                $query->where('name', $request['status']);
+            });
+        }
+        if (!empty($request['sort'])) {
+            if (in_array($request['sort'], ['asc', 'desc'])) {
+                foreach ($request['sort'] as $key => $value) {
+                    $query->orderBy($key, $value);
+                }
+            }
+        }
+        $query->with(['status', 'details']);
+        $limit = $request['limit'] ?? 10;
+        return $limit === 1 ? $query->first() : $query->paginate($limit);
+    }
+
     public static function getAllOrders($request)
     {
         $query = Order::query();
@@ -38,7 +67,10 @@ class OrderModel
             $order_status = OrderStatus::whereNull('deleted_at')->where('code', 'PENDING')->first();
 
             $order = new Order();
-            $order->code = generateSecureOrderCode();
+            if (!empty(auth()->user())) {
+                $order->user_id = auth()->user()->id;
+            }
+            $order->code = self::generateSecureOrderCode();
             $order->cart_id = $cart->id;
             $order->order_status_id = $order_status->id;
             $order->fullname = $request['fullname'];
@@ -67,7 +99,9 @@ class OrderModel
                 $order_detail->total_price = $detail->total_price;
                 $order_detail->save();
             }
-
+            CartDetail::whereNull('deleted_at')->where('cart_id', $cart->id)->update(['deleted_at' => Carbon::now('Asia/Ho_Chi_Minh')]);
+            $cart->deleted_at = Carbon::now('Asia/Ho_Chi_Minh');
+            $cart->save();
             DB::commit();
             return $order;
         } catch (Exception $e) {
@@ -97,7 +131,7 @@ class OrderModel
         }
     }
 
-    function generateSecureOrderCode()
+    public static function generateSecureOrderCode()
     {
         return 'DH-' . strtoupper(Str::random(10));
     }

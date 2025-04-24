@@ -44,4 +44,15 @@ class CartController extends Controller
         $cart = $this->model->getCart($request);
         return $this->discountModel->addDiscount($request, $cart);
     }
+
+    public function updateCartInfo(GetCartValidator $request)
+    {
+        $cart = $this->model->getCart($request);
+        if (!$cart) {
+            return response()->json(['status' => '404', 'message' => 'Không tìm thấy giỏ hàng'], 404);
+        }
+        $cart = $this->model->updateCartInfo($request, $cart);
+        $cart = $this->getCart($request);
+        return $cart;
+    }
 }

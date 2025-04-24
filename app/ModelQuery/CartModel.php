@@ -74,8 +74,8 @@ class CartModel
             DB::beginTransaction();
 
             $cart->fullname = $request['fullname'] ?? $cart->fullname;
-            $cart->phone = $request['phone'] ?? $cart->phone;
-            $cart->address = $request['address'] ?? $cart->address;
+            $cart->user_phone = $request['user_phone'] ?? $cart->user_phone;
+            $cart->user_address = $request['user_address'] ?? $cart->user_address;
             $cart->method_payment = $request['method_payment'] ?? $cart->method_payment;
             $cart->note = $request['note'] ?? $cart->note;
             $cart->save();
