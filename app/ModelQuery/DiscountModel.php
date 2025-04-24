@@ -70,11 +70,45 @@ class DiscountModel
                         }
                     }
                     if ($discount->data->discount_type == 'money') {
-                        $discount_price = $discount->data->value;
-                        if ($discount_price >= ($detail->quantity * $detail->price)) {
-                            $discount_price = ($detail->quantity * $detail->price);
+                        foreach ($cart->details as $detail) {
+                            $discount_price += (($detail->price * $detail->quantity) - $discount->data->value);
+                            if ($discount_price >= $discount->data->limit) {
+                                $discount_price = $discount->data->limit;
+                            }
+                            if ($discount_price >= $details->total_price) {
+                                $discount_price = $details->total_price;
+                            }
+                            $total_discount += $discount_price;
                         }
-                        $total_discount = $discount_price;
+                    }
+                }
+                if ($discount->data->type == 'only_product') {
+                    if ($discount->data->discount_type == 'percent') {
+                        foreach ($cart->details as $detail) {
+                            if ($detail->variant_id != $discount->data->variant_id) {
+                                $discount_price = ($detail->quantity * $detail->price) * ($discount->data->value / 100);
+                                if ($discount_price >= $discount->data->limit) {
+                                    $discount_price = $discount->data->limit;
+                                }
+                                $total_discount = $discount_price;
+                                break;
+                            }
+                        }
+                    }
+                    if ($discount->data->discount_type == 'money') {
+                        foreach ($cart->details as $detail) {
+                            if ($detail->variant_id != $discount->data->variant_id) {
+                                $discount_price += (($detail->price * $detail->quantity) - $discount->data->value);
+                                if ($discount_price >= $discount->data->limit) {
+                                    $discount_price = $discount->data->limit;
+                                }
+                                if ($discount_price >= $details->total_price) {
+                                    $discount_price = $details->total_price;
+                                }
+                                $total_discount += $discount_price;
+                                break;
+                            }
+                        }
                     }
                 }
 

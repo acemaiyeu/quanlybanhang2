@@ -75,6 +75,76 @@ class PromotionModel
                             }
                         }
                     }
+                    if ($promotion->apply_for == 'product' && !empty($promotion->data)) {
+                        if ($promotion->data->type == 'all_product' && !empty($cart->details)) {  // Giảm giá cho tất cả sản phẩm
+                            $total_discount = 0;
+                            if ($promotion->data->discount_type == 'percent') {
+                                foreach ($cart->details as $detail) {
+                                    $discount_price += (($detail->price * $detail->quantity) * ($promotion->data->value / 100));
+                                    if ($discount_price >= $promotion->data->limit) {
+                                        $discount_price = $promotion->data->limit;
+                                    }
+                                    if ($discount_price >= $details->total_price) {
+                                        $discount_price = $details->total_price;
+                                    }
+                                    $total_discount += $discount_price;
+                                }
+                            }
+                            if ($promotion->data->discount_type == 'money') {
+                                foreach ($cart->details as $detail) {
+                                    $discount_price += (($detail->price * $detail->quantity) - $promotion->data->value);
+                                    if ($discount_price >= $promotion->data->limit) {
+                                        $discount_price = $promotion->data->limit;
+                                    }
+                                    if ($discount_price >= $details->total_price) {
+                                        $discount_price = $details->total_price;
+                                    }
+                                    $total_discount += $discount_price;
+                                }
+                            }
+
+                            if ($total_discount > 0) {
+                                $cart->total_discount += $discount_price;
+                                $cart_info[] = [
+                                    'title' => $promotion->name,
+                                    'value' => $discount_price,
+                                    'value_text' => number_format($discount_price, 0, ',', '.') . 'đ',
+                                ];
+                            }
+                        }
+                        if ($promotion->data->type == 'only_product' && !empty($cart->details)) {
+                            if ($promotion->data->discount_type == 'percent') {
+                                foreach ($cart->details as $detail) {
+                                    if ($detail->variant_id === $promotion->data->variant_id) {
+                                        $discount_price += (($detail->price * $detail->quantity) * ($promotion->data->value / 100));
+                                        if ($discount_price >= $promotion->data->limit) {
+                                            $discount_price = $promotion->data->limit;
+                                        }
+                                        if ($discount_price >= $details->total_price) {
+                                            $discount_price = $details->total_price;
+                                        }
+                                        $total_discount += $discount_price;
+                                        break;
+                                    }
+                                }
+                            }
+                            if ($promotion->data->discount_type == 'money') {
+                                foreach ($cart->details as $detail) {
+                                    if ($detail->variant_id === $promotion->data->variant_id) {
+                                        $discount_price += (($detail->price * $detail->quantity) - $promotion->data->value);
+                                    }
+                                }
+                            }
+                            if ($total_discount > 0) {
+                                $cart->total_discount += $discount_price;
+                                $cart_info[] = [
+                                    'title' => $promotion->name,
+                                    'value' => $discount_price,
+                                    'value_text' => number_format($discount_price, 0, ',', '.') . 'đ',
+                                ];
+                            }
+                        }
+                    }
                 }
             }
             if (!empty($gifts)) {
@@ -108,7 +178,7 @@ class PromotionModel
                 if ($condition->condition_apply == 'product') {
                     if ($condition->condition_data->type === 'hava_in_cart') {  // Sản phẩm có trong giỏ hàng
                         foreach ($cart->details as $detail) {
-                            if ($detail->variant_id === $condition->condition_data->value && seft::caculatorParallel($detail->quantity, $condition->condition_data->operators, $condition->condition_data->value)) {
+                            if ($detail->variant_id === $condition->condition_data->variant_id && seft::caculatorParallel($detail->quantity, $condition->condition_data->operators, $condition->condition_data->value)) {
                                 $next = true;
                                 break;
                             }
