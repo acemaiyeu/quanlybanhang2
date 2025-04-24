@@ -78,14 +78,15 @@ class PromotionModel
                     if ($promotion->apply_for == 'product' && !empty($promotion->data)) {
                         if ($promotion->data->type == 'all_product' && !empty($cart->details)) {  // Giảm giá cho tất cả sản phẩm
                             $total_discount = 0;
+                            $discount_price = 0;
                             if ($promotion->data->discount_type == 'percent') {
                                 foreach ($cart->details as $detail) {
                                     $discount_price += (($detail->price * $detail->quantity) * ($promotion->data->value / 100));
                                     if ($discount_price >= $promotion->data->limit) {
                                         $discount_price = $promotion->data->limit;
                                     }
-                                    if ($discount_price >= $details->total_price) {
-                                        $discount_price = $details->total_price;
+                                    if ($discount_price >= $detail->total_price) {
+                                        $discount_price = $detail->total_price;
                                     }
                                     $total_discount += $discount_price;
                                 }

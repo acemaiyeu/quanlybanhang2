@@ -44,8 +44,8 @@ class DiscountModel
             $next = self::checkConditions($discount, $cart);
             // Trả thưởng
             if ($next) {
+                $total_discount = 0;
                 if ($discount->apply_for == 'cart' && !empty($discount->data)) {
-                    $total_discount = 0;
                     if ($discount->data->type == 'discount') {
                         if ($discount->data->discount_type == 'percent') {
                             $discount_price = $cart->total_price * ($discount->data->value / 100);
@@ -60,6 +60,7 @@ class DiscountModel
                     }
                 }
                 if ($discount->data->type == 'all_product') {
+                    $discount_price = 0;
                     if ($discount->data->discount_type == 'percent') {
                         foreach ($cart->details as $detail) {
                             $discount_price = ($detail->quantity * $detail->price) * ($discount->data->value / 100);
