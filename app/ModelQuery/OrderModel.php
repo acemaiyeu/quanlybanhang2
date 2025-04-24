@@ -41,11 +41,13 @@ class OrderModel
     {
         $query = Order::query();
         $query->whereNull('deleted_at');
-        $query->where('user_id', auth()->user()->id);
+        if (!empty($request['user_id'])) {
+            $query->where('user_id', $request['user_id']);
+        }
 
         if (!empty($request['status'])) {
             $query->whereHas('status', function ($query) use ($request) {
-                $query->where('name', $request['status']);
+                $query->where('code', $request['status']);
             });
         }
         if (!empty($request['sort'])) {
@@ -114,13 +116,11 @@ class OrderModel
     {
         try {
             DB::beginTransaction();
-            $order->cart_id = $cart->id;
-            $order->order_status_id = $order_status->id;
-            $order->fullname = $request['fullname'];
-            $order->user_phone = $request['user_phone'];
-            $order->user_address = $request['user_address'];
-            $order->method_payment = $request['method_payment'];
-            $order->note = $request['note'] ?? $cart->note;
+            $order->order_status_id = !empty($request['order_status_id']) ? $request['order_status_id'] : $order->order_status_id;
+            $order->fullname = $request['fullname'] ?? $order->fullname;
+            $order->user_phone = $request['user_phone'] ?? $order->user_phone;
+            $order->user_address = $request['user_address'] ?? $order->user_address;
+            $order->note = $request['note'] ?? $order->note;
             $order->save();
 
             DB::commit();

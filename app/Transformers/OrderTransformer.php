@@ -14,6 +14,7 @@ class OrderTransformer extends TransformerAbstract
             'id' => $order->id,
             'session_id' => $order->session_id,
             'status' => $order->status->name,
+            'status_code' => $order->status->code,
             'fullname' => $order->fullname ?? '',
             'user_phone' => $order->user_phone ?? '',
             'user_address' => $order->user_address ?? '',

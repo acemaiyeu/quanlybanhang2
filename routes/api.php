@@ -55,4 +55,20 @@ Route::prefix('v0')->group(function () {
 
 Route::middleware('auth.api.client')->prefix('client/v1')->group(function () {
     Route::get('my-orders', [OrderController::class, 'getMyOrders']);
+    Route::get('my-order/{code}', [OrderController::class, 'getMyOrder']);
+});
+
+Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
+    // Statistic
+    Route::get('statictis-revenue-week', [OrderController::class, 'getStatisticRevenueByWeek']);
+    Route::get('statictis-revenue-month', [OrderController::class, 'getStatisticRevenueByMonth']);
+    Route::get('statictis-new-orders-week', [OrderController::class, 'getStatisticNewOrdersByWeek']);
+    Route::get('statictis-new-orders-month', [OrderController::class, 'getStatisticNewOrdersByMonth']);
+    Route::get('statictis-new-customer-week', [OrderController::class, 'getStatisticNewCustomerByWeek']);
+    // Route::get('my-order/{code}', [OrderController::class, 'getMyOrder']);
+    // Orders
+    Route::get('list-orders', [OrderController::class, 'getAllOrders']);
+    Route::get('order-detail/{code}', [OrderController::class, 'getOrderDetail']);
+    Route::put('order-update/{code}', [OrderController::class, 'updateOrder']);
+    Route::put('order-update-status/{code}', [OrderController::class, 'updateStatusOrder']);
 });
