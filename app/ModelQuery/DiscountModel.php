@@ -62,7 +62,7 @@ class DiscountModel
             $discount->active = $request['active'];
             $discount->condition_apply = $request['condition_apply'];
             $discount->apply_for = $request['apply_for'];
-            $discount->data = json_encode($request['data']);
+            $discount->data = ($request['data']);
             $discount->created_at = Carbon::now('Asia/Ho_Chi_Minh');
             $discount->created_by = auth()->user()->id;
             $discount->save();
@@ -70,13 +70,14 @@ class DiscountModel
                 $condition = new DiscountCondition();
                 $condition->discount_id = $discount->id;
                 $condition->condition_apply = $detail['condition_apply'];
-                $condition->condition_data = json_encode($detail['condition_data']);
+                $condition->condition_data = ($detail['condition_data']);
                 $condition->created_at = Carbon::now('Asia/Ho_Chi_Minh');
                 $condition->created_by = auth()->user()->id;
                 $condition->save();
             }
-            return $discount;
+
             DB::commit();
+            return $discount;
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);
@@ -109,7 +110,7 @@ class DiscountModel
             $discount->active = $request['active'] ?? $discount->active;
             $discount->condition_apply = $request['condition_apply'] ?? $discount->condition_apply;
             $discount->apply_for = $request['apply_for'] ?? $discount->apply_for;
-            $discount->data = json_encode($request['data']) ?? $discount->data;
+            $discount->data = $request['data'] ?? $discount->data;
             $discount->updated_at = Carbon::now('Asia/Ho_Chi_Minh') ?? $discount->created_at;
             $discount->updated_by = auth()->user()->id;
             $discount->save();
@@ -119,7 +120,7 @@ class DiscountModel
                     if ($condition) {
                         $condition->discount_id = $detail['discount_id'] ?? $condition->discount_id;
                         $condition->condition_apply = $detail['condition_apply'] ?? $condition->condition_apply;
-                        $condition->condition_data = json_encode($detail['condition_data']) ?? $condition->condition_data;
+                        $condition->condition_data = ($detail['condition_data']) ?? $condition->condition_data;
                         $condition->updated_at = Carbon::now('Asia/Ho_Chi_Minh');
                         $condition->updated_by = auth()->user()->id;
                         $condition->save();
@@ -127,8 +128,8 @@ class DiscountModel
                 }
             }
 
-            return $discount;
             DB::commit();
+            return $discount;
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);
@@ -144,8 +145,8 @@ class DiscountModel
             $discount->deleted_at = Carbon::now('Asia/Ho_Chi_Minh');
             $discount->deleted_by = auth()->user()->id;
 
-            return $discount;
             DB::commit();
+            return $discount;
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);

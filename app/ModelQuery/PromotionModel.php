@@ -1,8 +1,9 @@
 <?php
 namespace App\ModelQuery;
 
-use App\ModelQuery\DiscountModel;
+use App\ModelQuery\PromotionModel;
 use App\Models\Promotion;
+use App\Models\PromotionCondition;
 use App\Models\Variant;
 use App\Models\WarehouseDetail;
 use Carbon\Carbon;
@@ -10,9 +11,145 @@ use Illuminate\Support\Facades\DB;
 
 class PromotionModel
 {
+    public function getPromotions($request)
+    {
+        $query = Promotion::query();
+        $query->whereNull('deleted_at');
+
+        if (!empty($request['code'])) {
+            $query->where('code', $request['code']);
+        }
+        if (!empty($request['name'])) {
+            $query->where('name', 'like', '%' . $request['name'] . '%');
+        }
+        if (!empty($request['start_date'])) {
+            $query->where('start_date', '<=', $request['start_date']);
+        }
+        if (!empty($request['end_date'])) {
+            $query->where('end_date', '>=', $request['end_date']);
+        }
+        if ($request['active'] !== null) {
+            $query->where('active', $request['active']);
+        }
+        if (!empty($request['sort'])) {
+            if (in_array($request['sort'], ['asc', 'desc'])) {
+                foreach ($request['sort'] as $key => $value) {
+                    $query->orderBy($key, $value);
+                }
+            }
+        }
+
+        $query->with('conditions');
+        $limit = $request['limit'] ?? 10;
+        return $limit === 1 ? $query->first() : $query->paginate($limit);
+    }
+
+    public function createPromotion($request)
+    {
+        try {
+            DB::beginTransaction();
+            $promotion = new Promotion();
+            $promotion->code = $request['code'];
+            $promotion->name = $request['name'];
+            $promotion->start_date = $request['start_date'];
+            $promotion->end_date = $request['end_date'];
+            $promotion->active = $request['active'];
+            $promotion->condition_apply = $request['condition_apply'];
+            $promotion->apply_for = $request['apply_for'];
+            $promotion->data = ($request['data']);
+            $promotion->created_at = Carbon::now('Asia/Ho_Chi_Minh');
+            $promotion->created_by = auth()->user()->id;
+            $promotion->save();
+            foreach ($request['conditions'] as $detail) {
+                $condition = new PromotionCondition();
+                $condition->Promotion_id = $promotion->id;
+                $condition->condition_apply = $detail['condition_apply'];
+                $condition->condition_data = ($detail['condition_data']);
+                $condition->created_at = Carbon::now('Asia/Ho_Chi_Minh');
+                $condition->created_by = auth()->user()->id;
+                $condition->save();
+            }
+
+            DB::commit();
+            return $promotion;
+        } catch (Exception $e) {
+            dd($e);
+            DB::rollBack();
+            return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);
+        }
+    }
+
+    public function updatePromotion($request)
+    {
+        $promotion = Promotion::where('code', $request['code'])->first();
+        if (!empty($request['condition_apply'])) {
+            if ($request['condition_apply'] === 'SOME' && $request['condition_apply'] === 'ALL') {
+                return response()->json(['data' => ['status' => 400, 'message' => 'Số lượng Điều kiện áp dụng Khuyến mãi phải là ALL (Tất cả) hoặc SOME (Có ít nhất một)']], 400);
+            }
+        }
+        if (!empty($request['data'])) {
+            if (!is_array($request['data'])) {
+                return response()->json(['data' => ['status' => 400, 'message' => 'Dữ liệu Áp dụng Khuyến mãi phải là mảng']], 400);
+            }
+        }
+        if (!empty($request['conditions'])) {
+            if (!is_array($request['conditions'])) {
+                return response()->json(['data' => ['status' => 400, 'message' => 'Điều kiện Áp dụng Khuyến mãi phải là mảng']], 400);
+            }
+        }
+        try {
+            DB::beginTransaction();
+            $promotion->name = $request['name'] ?? $promotion->name;
+            $promotion->start_date = $request['start_date'] ?? $promotion->start_date;
+            $promotion->end_date = $request['end_date'] ?? $promotion->end_date;
+            $promotion->active = $request['active'] ?? $promotion->active;
+            $promotion->condition_apply = $request['condition_apply'] ?? $promotion->condition_apply;
+            $promotion->apply_for = $request['apply_for'] ?? $promotion->apply_for;
+            $promotion->data = ($request['data']) ?? $promotion->data;
+            $promotion->updated_at = Carbon::now('Asia/Ho_Chi_Minh') ?? $promotion->created_at;
+            $promotion->updated_by = auth()->user()->id;
+            $promotion->save();
+            if (!empty($request['conditions'])) {
+                foreach ($request['conditions'] as $detail) {
+                    $condition = PromotionCondition::whereNull('deleted_at')->find($detail['id']);
+                    if ($condition) {
+                        $condition->condition_apply = $detail['condition_apply'] ?? $condition->condition_apply;
+                        $condition->condition_data = ($detail['condition_data']) ?? $condition->condition_data;
+                        $condition->updated_at = Carbon::now('Asia/Ho_Chi_Minh');
+                        $condition->updated_by = auth()->user()->id;
+                        $condition->save();
+                    }
+                }
+            }
+
+            DB::commit();
+            return $promotion;
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);
+        }
+    }
+
+    public function deletePromotion($request)
+    {
+        $promotion = Promotion::where('code', $request['code'])->first();
+
+        try {
+            DB::beginTransaction();
+            $promotion->deleted_at = Carbon::now('Asia/Ho_Chi_Minh');
+            $promotion->deleted_by = auth()->user()->id;
+
+            DB::commit();
+            return $promotion;
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);
+        }
+    }
+
     public function applyPromotion($cart)
     {
-        $cart->total_discount = 0;
+        $cart->total_Promotion = 0;
         $cart->total_price = $cart->details->sum('total_price');
         $cart_info[0] = [
             'title' => 'Tổng tiền hàng',
@@ -21,12 +158,12 @@ class PromotionModel
         ];
 
         $cart->info_payment = json_encode($cart_info);
-        // Apply Discount
-        if (!empty($cart->discount_code)) {
-            $cart = DiscountModel::applyDiscountCart($cart);
+        // Apply Promotion
+        if (!empty($cart->Promotion_code)) {
+            $cart = PromotionModel::applyPromotionCart($cart);
         }
         if (!empty($cart->fee_ship_code)) {
-            $cart = DiscountModel::applyDiscountShipping($cart);
+            $cart = PromotionModel::applyPromotionShipping($cart);
         }
 
         $cart_info = json_decode($cart->info_payment);
@@ -39,18 +176,18 @@ class PromotionModel
             foreach ($promotions as $promotion) {
                 if (self::checkConditions($promotion, $cart)) {
                     // Trả thưởng
-                    $total_discount = 0;
+                    $total_Promotion = 0;
                     if ($promotion->apply_for == 'cart' && !empty($promotion->data)) {
-                        if ($promotion->data->type == 'discount') {
-                            if ($promotion->data->discount_type == 'percent') {
-                                $discount_price = $cart->total_price * ($promotion->data->value / 100);
-                                if ($discount_price >= $promotion->data->limit) {
-                                    $discount_price = $promotion->data->limit;
+                        if ($promotion->data->type == 'Promotion') {
+                            if ($promotion->data->Promotion_type == 'percent') {
+                                $promotion_price = $cart->total_price * ($promotion->data->value / 100);
+                                if ($promotion_price >= $promotion->data->limit) {
+                                    $promotion_price = $promotion->data->limit;
                                 }
-                                $total_discount = $discount_price;
+                                $total_Promotion = $promotion_price;
                             }
-                            if ($promotion->data->discount_type == 'money') {
-                                $total_discount = $promotion->data->value;
+                            if ($promotion->data->Promotion_type == 'money') {
+                                $total_Promotion = $promotion->data->value;
                             }
                         }
                         if ($promotion->data->type == 'gift' && !empty($promotion->data->gifts)) {
@@ -77,71 +214,71 @@ class PromotionModel
                     }
                     if ($promotion->apply_for == 'product' && !empty($promotion->data)) {
                         if ($promotion->data->type == 'all_product' && !empty($cart->details)) {  // Giảm giá cho tất cả sản phẩm
-                            $total_discount = 0;
-                            $discount_price = 0;
-                            if ($promotion->data->discount_type == 'percent') {
+                            $total_Promotion = 0;
+                            $promotion_price = 0;
+                            if ($promotion->data->Promotion_type == 'percent') {
                                 foreach ($cart->details as $detail) {
-                                    $discount_price += (($detail->price * $detail->quantity) * ($promotion->data->value / 100));
-                                    if ($discount_price >= $promotion->data->limit) {
-                                        $discount_price = $promotion->data->limit;
+                                    $promotion_price += (($detail->price * $detail->quantity) * ($promotion->data->value / 100));
+                                    if ($promotion_price >= $promotion->data->limit) {
+                                        $promotion_price = $promotion->data->limit;
                                     }
-                                    if ($discount_price >= $detail->total_price) {
-                                        $discount_price = $detail->total_price;
+                                    if ($promotion_price >= $detail->total_price) {
+                                        $promotion_price = $detail->total_price;
                                     }
-                                    $total_discount += $discount_price;
+                                    $total_Promotion += $promotion_price;
                                 }
                             }
-                            if ($promotion->data->discount_type == 'money') {
+                            if ($promotion->data->Promotion_type == 'money') {
                                 foreach ($cart->details as $detail) {
-                                    $discount_price += (($detail->price * $detail->quantity) - $promotion->data->value);
-                                    if ($discount_price >= $promotion->data->limit) {
-                                        $discount_price = $promotion->data->limit;
+                                    $promotion_price += (($detail->price * $detail->quantity) - $promotion->data->value);
+                                    if ($promotion_price >= $promotion->data->limit) {
+                                        $promotion_price = $promotion->data->limit;
                                     }
-                                    if ($discount_price >= $details->total_price) {
-                                        $discount_price = $details->total_price;
+                                    if ($promotion_price >= $details->total_price) {
+                                        $promotion_price = $details->total_price;
                                     }
-                                    $total_discount += $discount_price;
+                                    $total_Promotion += $promotion_price;
                                 }
                             }
 
-                            if ($total_discount > 0) {
-                                $cart->total_discount += $discount_price;
+                            if ($total_Promotion > 0) {
+                                $cart->total_Promotion += $promotion_price;
                                 $cart_info[] = [
                                     'title' => $promotion->name,
-                                    'value' => $discount_price,
-                                    'value_text' => number_format($discount_price, 0, ',', '.') . 'đ',
+                                    'value' => $promotion_price,
+                                    'value_text' => number_format($promotion_price, 0, ',', '.') . 'đ',
                                 ];
                             }
                         }
                         if ($promotion->data->type == 'only_product' && !empty($cart->details)) {
-                            if ($promotion->data->discount_type == 'percent') {
+                            if ($promotion->data->Promotion_type == 'percent') {
                                 foreach ($cart->details as $detail) {
                                     if ($detail->variant_id === $promotion->data->variant_id) {
-                                        $discount_price += (($detail->price * $detail->quantity) * ($promotion->data->value / 100));
-                                        if ($discount_price >= $promotion->data->limit) {
-                                            $discount_price = $promotion->data->limit;
+                                        $promotion_price += (($detail->price * $detail->quantity) * ($promotion->data->value / 100));
+                                        if ($promotion_price >= $promotion->data->limit) {
+                                            $promotion_price = $promotion->data->limit;
                                         }
-                                        if ($discount_price >= $details->total_price) {
-                                            $discount_price = $details->total_price;
+                                        if ($promotion_price >= $details->total_price) {
+                                            $promotion_price = $details->total_price;
                                         }
-                                        $total_discount += $discount_price;
+                                        $total_Promotion += $promotion_price;
                                         break;
                                     }
                                 }
                             }
-                            if ($promotion->data->discount_type == 'money') {
+                            if ($promotion->data->Promotion_type == 'money') {
                                 foreach ($cart->details as $detail) {
                                     if ($detail->variant_id === $promotion->data->variant_id) {
-                                        $discount_price += (($detail->price * $detail->quantity) - $promotion->data->value);
+                                        $promotion_price += (($detail->price * $detail->quantity) - $promotion->data->value);
                                     }
                                 }
                             }
-                            if ($total_discount > 0) {
-                                $cart->total_discount += $discount_price;
+                            if ($total_Promotion > 0) {
+                                $cart->total_Promotion += $promotion_price;
                                 $cart_info[] = [
                                     'title' => $promotion->name,
-                                    'value' => $discount_price,
-                                    'value_text' => number_format($discount_price, 0, ',', '.') . 'đ',
+                                    'value' => $promotion_price,
+                                    'value_text' => number_format($promotion_price, 0, ',', '.') . 'đ',
                                 ];
                             }
                         }
@@ -153,7 +290,7 @@ class PromotionModel
             }
         }
 
-        $total_payment = $cart_info[0]->value - $cart->total_discount;
+        $total_payment = $cart_info[0]->value - $cart->total_Promotion;
         $cart_info[] = [
             'title' => 'Tổng thanh toán',
             'value' => $total_payment,

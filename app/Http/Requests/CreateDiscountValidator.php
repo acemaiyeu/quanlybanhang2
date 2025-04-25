@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Category;
+use App\Models\Discount;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -26,7 +26,7 @@ class CreateDiscountValidator extends FormRequest
     {
         return [
             'code' => ['required', function ($attribute, $value, $fail) {
-                $exists = Category::whereNull('deleted_at')->where('code', $value)->exists();
+                $exists = Discount::whereNull('deleted_at')->where('code', $value)->exists();
                 if ($exists) {
                     $fail('Mã Khuyến mãi đã tồn tại');
                 }

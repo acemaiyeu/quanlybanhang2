@@ -6,8 +6,10 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\ImageProxyController;
 use App\Http\Controllers\ImgurController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\VariantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -103,4 +105,14 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
     Route::post('discount', [DiscountController::class, 'createDiscount']);
     Route::put('discount', [DiscountController::class, 'updateDiscount']);
     Route::delete('discount/{code}', [DiscountController::class, 'deleteDiscount']);
+
+    // Promotion
+    Route::get('list-promotions', [PromotionController::class, 'getAllPromotions']);
+    Route::get('promotion/{code}', [PromotionController::class, 'getDetailPromotion']);
+    Route::post('promotion', [PromotionController::class, 'createPromotion']);
+    Route::put('promotion', [PromotionController::class, 'updatePromotion']);
+    Route::delete('promotion/{code}', [PromotionController::class, 'deletePromotion']);
+
+    // Promotion
+    Route::get('list-inventories', [InventoryController::class, 'getAllInventories']);
 });
