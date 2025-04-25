@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\ImageProxyController;
 use App\Http\Controllers\ImgurController;
 use App\Http\Controllers\OrderController;
@@ -95,4 +96,11 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
     Route::post('category', [CategoryController::class, 'createCategory']);
     Route::put('category', [CategoryController::class, 'updateCategory']);
     Route::delete('category/{code}', [CategoryController::class, 'deleteCategory']);
+
+    // Discount
+    Route::get('list-discounts', [DiscountController::class, 'getAllDiscounts']);
+    Route::get('discount/{code}', [DiscountController::class, 'getDetailDiscount']);
+    Route::post('discount', [DiscountController::class, 'createDiscount']);
+    Route::put('discount', [DiscountController::class, 'updateDiscount']);
+    Route::delete('discount/{code}', [DiscountController::class, 'deleteDiscount']);
 });

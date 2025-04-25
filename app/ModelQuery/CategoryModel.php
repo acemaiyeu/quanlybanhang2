@@ -12,8 +12,8 @@ class CategoryModel
         $query = Category::query();
         $query->whereNull('deleted_at');
 
-        if (!empty($request['category_id'])) {
-            $query->where('category_id', $request['category_id']);
+        if (!empty($request['id'])) {
+            $query->where('id', $request['id']);
         }
         if (!empty($request['category_code'])) {
             $query->where('code', $request['category_code']);

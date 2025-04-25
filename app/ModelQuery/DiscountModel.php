@@ -4,6 +4,7 @@ namespace App\ModelQuery;
 use App\ModelQuery\PromotionModel;
 use App\Models\CartDetail;
 use App\Models\Discount;
+use App\Models\DiscountCondition;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -14,6 +15,141 @@ class DiscountModel
     public function __construct(PromotionModel $promotionModel)
     {
         $this->promotionModel = $promotionModel;
+    }
+
+    public function getDiscounts($request)
+    {
+        $query = Discount::query();
+        $query->whereNull('deleted_at');
+
+        if (!empty($request['code'])) {
+            $query->where('code', $request['code']);
+        }
+        if (!empty($request['name'])) {
+            $query->where('name', 'like', '%' . $request['name'] . '%');
+        }
+        if (!empty($request['start_date'])) {
+            $query->where('start_date', '<=', $request['start_date']);
+        }
+        if (!empty($request['end_date'])) {
+            $query->where('end_date', '>=', $request['end_date']);
+        }
+        if ($request['active'] !== null) {
+            $query->where('active', $request['active']);
+        }
+        if (!empty($request['sort'])) {
+            if (in_array($request['sort'], ['asc', 'desc'])) {
+                foreach ($request['sort'] as $key => $value) {
+                    $query->orderBy($key, $value);
+                }
+            }
+        }
+
+        $query->with('conditions');
+        $limit = $request['limit'] ?? 10;
+        return $limit === 1 ? $query->first() : $query->paginate($limit);
+    }
+
+    public function createDiscount($request)
+    {
+        try {
+            DB::beginTransaction();
+            $discount = new Discount();
+            $discount->code = $request['code'];
+            $discount->name = $request['name'];
+            $discount->start_date = $request['start_date'];
+            $discount->end_date = $request['end_date'];
+            $discount->active = $request['active'];
+            $discount->condition_apply = $request['condition_apply'];
+            $discount->apply_for = $request['apply_for'];
+            $discount->data = json_encode($request['data']);
+            $discount->created_at = Carbon::now('Asia/Ho_Chi_Minh');
+            $discount->created_by = auth()->user()->id;
+            $discount->save();
+            foreach ($request['conditions'] as $detail) {
+                $condition = new DiscountCondition();
+                $condition->discount_id = $discount->id;
+                $condition->condition_apply = $detail['condition_apply'];
+                $condition->condition_data = json_encode($detail['condition_data']);
+                $condition->created_at = Carbon::now('Asia/Ho_Chi_Minh');
+                $condition->created_by = auth()->user()->id;
+                $condition->save();
+            }
+            return $discount;
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);
+        }
+    }
+
+    public function updateDiscount($request)
+    {
+        $discount = Discount::where('code', $request['code'])->first();
+        if (!empty($request['condition_apply'])) {
+            if ($request['condition_apply'] === 'SOME' && $request['condition_apply'] === 'ALL') {
+                return response()->json(['data' => ['status' => 400, 'message' => 'Số lượng Điều kiện áp dụng Khuyến mãi phải là ALL (Tất cả) hoặc SOME (Có ít nhất một)']], 400);
+            }
+        }
+        if (!empty($request['data'])) {
+            if (!is_array($request['data'])) {
+                return response()->json(['data' => ['status' => 400, 'message' => 'Dữ liệu Áp dụng Khuyến mãi phải là mảng']], 400);
+            }
+        }
+        if (!empty($request['conditions'])) {
+            if (!is_array($request['conditions'])) {
+                return response()->json(['data' => ['status' => 400, 'message' => 'Điều kiện Áp dụng Khuyến mãi phải là mảng']], 400);
+            }
+        }
+        try {
+            DB::beginTransaction();
+            $discount->name = $request['name'] ?? $discount->name;
+            $discount->start_date = $request['start_date'] ?? $discount->start_date;
+            $discount->end_date = $request['end_date'] ?? $discount->end_date;
+            $discount->active = $request['active'] ?? $discount->active;
+            $discount->condition_apply = $request['condition_apply'] ?? $discount->condition_apply;
+            $discount->apply_for = $request['apply_for'] ?? $discount->apply_for;
+            $discount->data = json_encode($request['data']) ?? $discount->data;
+            $discount->updated_at = Carbon::now('Asia/Ho_Chi_Minh') ?? $discount->created_at;
+            $discount->updated_by = auth()->user()->id;
+            $discount->save();
+            if (!empty($request['conditions'])) {
+                foreach ($request['conditions'] as $detail) {
+                    $condition = DiscountCondition::whereNull('deleted_at')->find($detail['id']);
+                    if ($condition) {
+                        $condition->discount_id = $detail['discount_id'] ?? $condition->discount_id;
+                        $condition->condition_apply = $detail['condition_apply'] ?? $condition->condition_apply;
+                        $condition->condition_data = json_encode($detail['condition_data']) ?? $condition->condition_data;
+                        $condition->updated_at = Carbon::now('Asia/Ho_Chi_Minh');
+                        $condition->updated_by = auth()->user()->id;
+                        $condition->save();
+                    }
+                }
+            }
+
+            return $discount;
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);
+        }
+    }
+
+    public function deleteDiscount($request)
+    {
+        $discount = Discount::where('code', $request['code'])->first();
+
+        try {
+            DB::beginTransaction();
+            $discount->deleted_at = Carbon::now('Asia/Ho_Chi_Minh');
+            $discount->deleted_by = auth()->user()->id;
+
+            return $discount;
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['data' => ['status' => 400, 'message' => $e->getMessage()]], 400);
+        }
     }
 
     public function addDiscount($request, $cart)
