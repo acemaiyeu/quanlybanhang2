@@ -22,4 +22,10 @@ class VariantController extends Controller
 
         return fractal($variant, new VariantTransformer())->respond();
     }
+
+    public function getAllVariants(Request $request)
+    {
+        $variant = $this->model->getVariantProduct($request);
+        return fractal($variant, new VariantTransformer())->respond();
+    }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ImageProxyController;
 use App\Http\Controllers\ImgurController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\VariantController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -71,4 +72,17 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
     Route::get('order-detail/{code}', [OrderController::class, 'getOrderDetail']);
     Route::put('order-update/{code}', [OrderController::class, 'updateOrder']);
     Route::put('order-update-status/{code}', [OrderController::class, 'updateStatusOrder']);
+
+    // Product
+
+    Route::get('list-products', [ProductController::class, 'getAllProducts']);
+    Route::post('product', [ProductController::class, 'createProduct']);
+    Route::put('product', [ProductController::class, 'updateProduct']);
+    Route::delete('product/{code}', [ProductController::class, 'deleteProduct']);
+
+    // Variant
+    Route::get('list-variants', [VariantController::class, 'getAllVariants']);
+    // Route::post('product', [ProductController::class, 'createProduct']);
+    // Route::put('product', [ProductController::class, 'updateProduct']);
+    // Route::delete('product/{code}', [ProductController::class, 'deleteProduct']);
 });

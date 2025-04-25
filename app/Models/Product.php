@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Category;
 use App\Models\Unit;
 use App\Models\User;
+use App\Models\Variant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,7 +33,19 @@ class Product extends Model
 
     public function category()
     {
-        return $this->hasOne(Category::class, 'id', 'category_id');
+        return $this->hasOne(Category::class, 'id', 'category_id')->select('id', 'code', 'name');;
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(Variant::class, 'product_id', 'id')->select(
+            'id',
+            'product_id',
+            'price',
+            'variants_info',
+            'thumbnail',
+            'images'
+        );
     }
 
     public function unit()
