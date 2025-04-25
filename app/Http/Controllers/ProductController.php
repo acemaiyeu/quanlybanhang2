@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateProductValidator;
 use App\Http\Requests\DeleteProductValidator;
+use App\Http\Requests\DetailProductValidator;
 use App\Http\Requests\UpdateProductValidator;
 use App\ModelQuery\ProductModel;
 use App\Transformers\ProductTransformer;
@@ -44,5 +45,12 @@ class ProductController extends Controller
     {
         $product = $this->model->deleteProduct($request);
         return response()->json(['status' => '200', 'message' => 'success'], 200);
+    }
+
+    public function getDetailProduct(DetailProductValidator $request)
+    {
+        $request['limit'] = 1;
+        $products = $this->model->getProducts($request);
+        return fractal($products, new ProductTransformer())->respond();
     }
 }

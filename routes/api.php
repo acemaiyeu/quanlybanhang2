@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ImageProxyController;
 use App\Http\Controllers\ImgurController;
 use App\Http\Controllers\OrderController;
@@ -76,13 +77,22 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
     // Product
 
     Route::get('list-products', [ProductController::class, 'getAllProducts']);
+    Route::get('product/{code}', [ProductController::class, 'getDetailProduct']);
     Route::post('product', [ProductController::class, 'createProduct']);
     Route::put('product', [ProductController::class, 'updateProduct']);
     Route::delete('product/{code}', [ProductController::class, 'deleteProduct']);
 
     // Variant
     Route::get('list-variants', [VariantController::class, 'getAllVariants']);
-    // Route::post('product', [ProductController::class, 'createProduct']);
-    // Route::put('product', [ProductController::class, 'updateProduct']);
-    // Route::delete('product/{code}', [ProductController::class, 'deleteProduct']);
+    Route::get('variant/{id}', [VariantController::class, 'getDetailVariant']);
+    Route::post('variant', [VariantController::class, 'createVariant']);
+    Route::put('variant', [VariantController::class, 'updateVariant']);
+    Route::delete('variant/{id}', [VariantController::class, 'deleteVariant']);
+
+    // Variant
+    Route::get('list-categories', [CategoryController::class, 'getAllCategories']);
+    Route::get('category/{code}', [CategoryController::class, 'getDetailCategory']);
+    Route::post('category', [CategoryController::class, 'createCategory']);
+    Route::put('category', [CategoryController::class, 'updateCategory']);
+    Route::delete('category/{code}', [CategoryController::class, 'deleteCategory']);
 });
