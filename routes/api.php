@@ -115,4 +115,8 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
 
     // Promotion
     Route::get('list-inventories', [InventoryController::class, 'getAllInventories']);
+    Route::get('inventory/{id}', [InventoryController::class, 'getDetailInventory']);
+    Route::post('inventory', [InventoryController::class, 'createInventory']);
+    Route::put('inventory', [InventoryController::class, 'updateInventory']);
+    Route::delete('inventory/{id}', [InventoryController::class, 'deleteInventory']);
 });
