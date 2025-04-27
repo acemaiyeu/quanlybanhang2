@@ -11,6 +11,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\VariantController;
+use App\Http\Controllers\WarehouseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -119,4 +120,11 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
     Route::post('inventory', [InventoryController::class, 'createInventory']);
     Route::put('inventory', [InventoryController::class, 'updateInventory']);
     Route::delete('inventory/{id}', [InventoryController::class, 'deleteInventory']);
+
+    // Warehouse
+    Route::get('list-warehouses', [WarehouseController::class, 'getAllWarehouses']);
+    Route::get('warehouse/{id}', [WarehouseController::class, 'getDetailWarehouse']);
+    Route::post('warehouse', [WarehouseController::class, 'createWarehouse']);
+    Route::put('warehouse', [WarehouseController::class, 'updateWarehouse']);
+    Route::delete('warehouse/{code}', [WarehouseController::class, 'deleteWarehouse']);
 });
