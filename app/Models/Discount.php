@@ -40,6 +40,11 @@ class Discount extends Model
         return $this->hasMany(DiscountCondition::class, 'discount_id', 'id');
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'discount_code', 'code');
+    }
+
     public function createdBy()
     {
         return $this->hasOne(User::class, 'id', 'created_by');

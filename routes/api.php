@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\StatisticController;
 use App\Http\Controllers\VariantController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\WarehouseDetailController;
@@ -66,12 +68,6 @@ Route::middleware('auth.api.client')->prefix('client/v1')->group(function () {
 });
 
 Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
-    // Statistic
-    Route::get('statictis-revenue-week', [OrderController::class, 'getStatisticRevenueByWeek']);
-    Route::get('statictis-revenue-month', [OrderController::class, 'getStatisticRevenueByMonth']);
-    Route::get('statictis-new-orders-week', [OrderController::class, 'getStatisticNewOrdersByWeek']);
-    Route::get('statictis-new-orders-month', [OrderController::class, 'getStatisticNewOrdersByMonth']);
-    Route::get('statictis-new-customer-week', [OrderController::class, 'getStatisticNewCustomerByWeek']);
     // Route::get('my-order/{code}', [OrderController::class, 'getMyOrder']);
     // Orders
     Route::get('list-orders', [OrderController::class, 'getAllOrders']);
@@ -135,4 +131,23 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
     Route::post('warehouse-detail', [WarehouseDetailController::class, 'createWarehouseDetail']);
     Route::put('warehouse-detail', [WarehouseDetailController::class, 'updateWarehouseDetail']);
     Route::delete('warehouse-detail/{id}', [WarehouseDetailController::class, 'deleteWarehouseDetail']);
+
+    // Account
+    Route::get('list-accounts', [AccountController::class, 'getAllAccounts']);
+    Route::get('account/{id}', [AccountController::class, 'getDetailAccount']);
+    Route::post('account', [AccountController::class, 'createAccount']);
+    Route::put('account', [AccountController::class, 'updateAccount']);
+    Route::put('account/change-password', [AccountController::class, 'changePasswordAccount']);
+    Route::delete('account/{id}', [AccountController::class, 'deleteAccount']);
+
+    // Role
+
+    // Statistic
+    Route::get('statictis-revenue-week', [OrderController::class, 'getStatisticRevenueByWeek']);
+    Route::get('statictis-revenue-month', [OrderController::class, 'getStatisticRevenueByMonth']);
+    Route::get('statictis-new-orders-week', [OrderController::class, 'getStatisticNewOrdersByWeek']);
+    Route::get('statictis-new-orders-month', [OrderController::class, 'getStatisticNewOrdersByMonth']);
+    Route::get('statictis-new-customer-week', [OrderController::class, 'getStatisticNewCustomerByWeek']);
+
+    Route::get('statistic-discounts', [StatisticController::class, 'getStatisticDiscounts']);
 });

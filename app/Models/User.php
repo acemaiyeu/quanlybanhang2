@@ -61,21 +61,21 @@ class User extends Authenticatable implements JWTSubject
 
     public function role()
     {
-        return $this->hasOne(Role::class, 'id', 'role_id');
+        return $this->hasOne(Role::class, 'id', 'role_id')->select('id', 'code', 'name');;
     }
 
     public function city()
     {
-        return $this->hasOne(City::class, 'id', 'city_id');
+        return $this->hasOne(City::class, 'id', 'city_id')->select('id', 'code', 'name');
     }
 
     public function district()
     {
-        return $this->hasOne(District::class, 'id', 'district_id');
+        return $this->hasOne(District::class, 'id', 'district_id')->select('id', 'code', 'name');;
     }
 
     public function ward()
     {
-        return $this->hasOne(Ward::class, 'id', 'ward_id');
+        return $this->hasOne(Ward::class, 'id', 'ward_id')->select('id', 'code', 'name');;
     }
 }

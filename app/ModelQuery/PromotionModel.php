@@ -245,6 +245,7 @@ class PromotionModel
                                 $cart->total_Promotion += $promotion_price;
                                 $cart_info[] = [
                                     'title' => $promotion->name,
+                                    'code' => $promotion->code,
                                     'value' => $promotion_price,
                                     'value_text' => number_format($promotion_price, 0, ',', '.') . 'đ',
                                 ];
@@ -277,6 +278,7 @@ class PromotionModel
                                 $cart->total_Promotion += $promotion_price;
                                 $cart_info[] = [
                                     'title' => $promotion->name,
+                                    'code' => $promotion->code,
                                     'value' => $promotion_price,
                                     'value_text' => number_format($promotion_price, 0, ',', '.') . 'đ',
                                 ];

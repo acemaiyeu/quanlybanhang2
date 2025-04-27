@@ -12,7 +12,7 @@ class WarehouseModel
         $query = Warehouse::query();
         $query->whereNull('deleted_at');
         if (!empty($request['code'])) {
-            $query->where('code', $request['product_name']);
+            $query->where('code', $request['code']);
         }
         if (!empty($request['name'])) {
             $query->where('name', 'like', '%' . $request['name'] . '%');

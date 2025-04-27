@@ -253,6 +253,7 @@ class DiscountModel
                 if ($total_discount > 0) {
                     $info_payment[] = [
                         'title' => $discount->name,
+                        'code' => $discount->code,
                         'value' => $total_discount,
                         'value_text' => '-' . number_format($total_discount, 0, ',', '.') . ' đ',
                     ];
@@ -292,6 +293,7 @@ class DiscountModel
                 if ($total_discount > 0) {
                     $info_payment[] = [
                         'title' => $discount->name,
+                        'code' => $discount->code,
                         'value' => $total_discount,
                         'value_text' => '-' . number_format($total_discount, 0, ',', '.') . ' đ',
                     ];
