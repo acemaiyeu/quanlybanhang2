@@ -15,11 +15,11 @@ class CategoryModel
         if (!empty($request['id'])) {
             $query->where('id', $request['id']);
         }
-        if (!empty($request['category_code'])) {
-            $query->where('code', $request['category_code']);
+        if (!empty($request['code'])) {
+            $query->where('code', $request['code']);
         }
-        if (!empty($request['category_name'])) {
-            $query->where('name', 'like', '%' . $request['category_name'] . '%');
+        if (!empty($request['name'])) {
+            $query->where('name', 'like', '%' . $request['name'] . '%');
         }
         if (!empty($request['product_code'])) {
             $query->whereHas('product', function ($query) use ($request) {

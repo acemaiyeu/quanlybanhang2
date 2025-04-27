@@ -11,6 +11,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StatisticController;
 use App\Http\Controllers\VariantController;
 use App\Http\Controllers\WarehouseController;
@@ -141,7 +142,11 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
     Route::delete('account/{id}', [AccountController::class, 'deleteAccount']);
 
     // Role
-
+    Route::get('list-roles', [RoleController::class, 'getAllRoles']);
+    Route::get('role/{code}', [RoleController::class, 'getDetailRole']);
+    Route::post('role', [RoleController::class, 'createRole']);
+    Route::put('role', [RoleController::class, 'updateRole']);
+    Route::delete('role/{code}', [RoleController::class, 'deleteRole']);
     // Statistic
     Route::get('statictis-revenue-week', [OrderController::class, 'getStatisticRevenueByWeek']);
     Route::get('statictis-revenue-month', [OrderController::class, 'getStatisticRevenueByMonth']);
