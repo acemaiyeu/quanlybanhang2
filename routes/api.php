@@ -9,6 +9,7 @@ use App\Http\Controllers\ImageProxyController;
 use App\Http\Controllers\ImgurController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\RoleController;
@@ -147,6 +148,14 @@ Route::middleware('auth.api.admin')->prefix('admin/v1')->group(function () {
     Route::post('role', [RoleController::class, 'createRole']);
     Route::put('role', [RoleController::class, 'updateRole']);
     Route::delete('role/{code}', [RoleController::class, 'deleteRole']);
+
+    // Permission
+    Route::get('list-permissions', [PermissionController::class, 'getAllPermissions']);
+    Route::get('permission/{code}', [PermissionController::class, 'getDetailPermission']);
+    Route::post('permission', [PermissionController::class, 'createPermission']);
+    Route::put('permission', [PermissionController::class, 'updatePermission']);
+    Route::delete('permission/{code}', [PermissionController::class, 'deletePermission']);
+
     // Statistic
     Route::get('statictis-revenue-week', [OrderController::class, 'getStatisticRevenueByWeek']);
     Route::get('statictis-revenue-month', [OrderController::class, 'getStatisticRevenueByMonth']);
