@@ -31,12 +31,12 @@ class WarehouseDetail extends Model
 
     public function warehouse()
     {
-        return $this->hasOne(Warehouse::class, 'id', 'warehouse_id');
+        return $this->hasOne(Warehouse::class, 'id', 'warehouse_id')->select('id', 'code', 'name', 'address', 'lat', 'long', 'created_at');
     }
 
     public function variant()
     {
-        return $this->hasOne(Variant::class, 'id', 'variant_id');
+        return $this->hasOne(Variant::class, 'id', 'variant_id')->with('product')->select('id', 'product_id', 'variants_info', 'thumbnail', 'created_at');
     }
 
     public function createdBy()
